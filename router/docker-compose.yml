@@ -1,0 +1,20 @@
+version: '2'
+services:
+  router:
+    container_name: router
+    image: nginx:stable
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./conf:/etc/nginx/conf:ro
+      - ./html:/usr/share/nginx/html
+      - /isaac/data/.htpasswd:/etc/apache2/.htpasswd
+      - /isaac/data/certificates:/letsencrypt
+      - /isaac/data/dhparam.pem:/dhparam.pem
+    restart: always
+networks:
+  default:
+    external:
+      name: isaac

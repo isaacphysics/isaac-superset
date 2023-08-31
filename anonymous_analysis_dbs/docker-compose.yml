@@ -1,0 +1,58 @@
+version: "2"
+services:
+  phy-anon-db:
+    image: postgres:13
+    container_name: phy-anon-db
+    shm_size: 2G
+    restart: unless-stopped
+    volumes:
+      - phy-anon-data:/var/lib/postgresql/data
+      # Comment out this line to initialise a fresh db:
+      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+    environment:
+      POSTGRES_USER: ${ANON_DB_PG_USER}
+      POSTGRES_PASSWORD: ${ANON_DB_PG_PASS}
+    networks:
+      default:
+        ipv4_address: 172.20.0.2
+  cs-anon-db:
+    image: postgres:13
+    container_name: cs-anon-db
+    shm_size: 2G
+    restart: unless-stopped
+    volumes:
+      - cs-anon-data:/var/lib/postgresql/data
+      # Comment out this line to initialise a fresh db:
+      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+    environment:
+      POSTGRES_USER: ${ANON_DB_PG_USER}
+      POSTGRES_PASSWORD: ${ANON_DB_PG_PASS}
+    networks:
+      default:
+        ipv4_address: 172.20.0.3
+  ada-anon-db:
+    image: postgres:13
+    container_name: ada-anon-db
+    shm_size: 2G
+    restart: unless-stopped
+    volumes:
+      - ada-anon-data:/var/lib/postgresql/data
+      # Comment out this line to initialise a fresh db:
+      - ./postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+    environment:
+      POSTGRES_USER: ${ANON_DB_PG_USER}
+      POSTGRES_PASSWORD: ${ANON_DB_PG_PASS}
+    networks:
+      default:
+        ipv4_address: 172.20.0.4
+networks:
+  default:
+    external:
+      name: isaac
+volumes:
+  phy-anon-data:
+    external: true
+  cs-anon-data:
+    external: true
+  ada-anon-data:
+    external: true
