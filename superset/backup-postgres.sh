@@ -1,0 +1,1 @@
+./_dump_postgres.sh | gzip > /isaac/data/superset-backup/"$1"
