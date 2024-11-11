@@ -1,1 +1,1 @@
-./_dump_postgres.sh | gzip > /isaac/data/superset-backup/"$1"
+./_dump_postgres.sh | gzip > /isaac/data/superset-v4-backup/"$1"
