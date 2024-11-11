@@ -14,49 +14,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:${TAG:-latest}
+
+# -----------------------------------------------------------------------
+# We don't support docker compose for production environments.
+# If you choose to use this type of deployment make sure to
+# create you own docker environment file (docker/.env) with your own
+# unique random secure passwords and SECRET_KEY.
+# -----------------------------------------------------------------------
+x-superset-image: &superset-image apache/superset:${TAG:-latest}
 x-superset-depends-on: &superset-depends-on
   - db
   - redis
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
   - ./docker:/app/docker
-  - superset_home:/app/superset_home
+  - superset_v4_home:/app/superset_home
 
-version: "3.7"
 services:
   redis:
     image: redis:7
-    container_name: superset_cache
+    container_name: superset_v4_cache
     restart: unless-stopped
     volumes:
-      - redis:/data
+      - superset_v4_cache:/data
 
   db:
     env_file: docker/.env-prod
-    image: postgres:10
-    container_name: superset_db
+    image: postgres:15
+    container_name: superset_v4_db
     restart: unless-stopped
     volumes:
-      - superset_db_home:/var/lib/postgresql/data
+      - superset_v4_db_home:/var/lib/postgresql/data
       - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   superset:
     env_file: docker/.env-prod
     image: *superset-image
-    container_name: superset_app
+    container_name: superset_v4_app
     command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
     user: "root"
     restart: unless-stopped
-# DO NOT BYPASS THE FIREWALL!!!
-#    ports:
-#      - 8088:8088
+    # We're using Nginx to control access, so don't expose ports directly
+    #    ports:
+    #    - 8088:8088
     depends_on: *superset-depends-on
     volumes: *superset-volumes
 
   superset-init:
     image: *superset-image
-    container_name: superset_init
+    container_name: superset_v4_init
     command: ["/app/docker/docker-init.sh"]
     env_file: docker/.env-prod
     depends_on: *superset-depends-on
@@ -67,7 +73,7 @@ services:
 
   superset-worker:
     image: *superset-image
-    container_name: superset_worker
+    container_name: superset_v4_worker
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
     env_file: docker/.env-prod
     restart: unless-stopped
@@ -83,7 +89,7 @@ services:
 
   superset-worker-beat:
     image: *superset-image
-    container_name: superset_worker_beat
+    container_name: superset_v4_worker_beat
     command: ["/app/docker/docker-bootstrap.sh", "beat"]
     env_file: docker/.env-prod
     restart: unless-stopped
@@ -94,11 +100,11 @@ services:
       disable: true
 
 volumes:
-  superset_home:
+  superset_v4_home:
     external: true
-  superset_db_home:
+  superset_v4_db_home:
     external: true
-  redis:
+  superset_v4_cache:
     external: false
 
 networks:
