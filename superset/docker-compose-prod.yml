@@ -59,6 +59,9 @@ services:
     #    - 8088:8088
     depends_on: *superset-depends-on
     volumes: *superset-volumes
+    networks:
+      default:
+        ipv4_address: 172.20.1.255
 
   superset-init:
     image: *superset-image
