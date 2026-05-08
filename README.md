@@ -9,4 +9,4 @@ Config for our deployment of Apache Superset.
 
 ## Deployment
 * Read the readme under [docker](superset/docker/README.md). 
-* Run `TAG=[version] docker-compose -f docker-compse-prod.yml up -d`.
+* Run `TAG=[version] docker-compose -f docker-compose-prod.yml up -d`.
