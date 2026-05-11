@@ -78,8 +78,6 @@ services:
     volumes: *superset-volumes
     healthcheck:
       disable: true
-    ports:
-      - 8088:8088
 
   superset-worker:
     build: .
