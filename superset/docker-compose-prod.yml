@@ -24,10 +24,6 @@
 # For verbose logging during development:
 # - Set superset_LOG_LEVEL=debug in docker/.env-local for detailed Superset logs
 # -----------------------------------------------------------------------
-x-superset-image: &superset-image apache/superset:${TAG:-latest}
-x-superset-depends-on: &superset-depends-on
-  - db
-  - redis
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
   - ./docker:/app/docker
@@ -52,7 +48,7 @@ services:
 
   superset:
     env_file: docker/.env-prod
-    image: *superset-image
+    build: .
     container_name: superset_v6_app
     command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
     user: "root"
@@ -60,40 +56,40 @@ services:
     # We're using Nginx to control access, so don't expose ports directly
     #    ports:
     #    - 8088:8088
-    depends_on: *superset-depends-on
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
     volumes: *superset-volumes
     networks:
       default:
         ipv4_address: 172.20.1.255
 
   superset-init:
-    image: *superset-image
+    build: .
     container_name: superset_v6_init
-    command: >
-      sh -c "
-      uv pip install psycopg2-binary &&
-      superset db upgrade &&
-      superset init &&
-      gunicorn -w 2 --timeout 60 -b 0.0.0.0:8088 'superset.app:create_app()'
-      "
+    command: ["/app/docker/docker-init.sh"]
     env_file: docker/.env-prod
-    depends_on: *superset-depends-on
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
     user: "root"
     volumes: *superset-volumes
     healthcheck:
       disable: true
-    environment:
-      - EXTRA_PIP_PACKAGES=psycopg2-binary
     ports:
       - 8088:8088
 
   superset-worker:
-    image: *superset-image
+    build: .
     container_name: superset_v6_worker
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
     env_file: docker/.env-prod
     restart: unless-stopped
-    depends_on: *superset-depends-on
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
     user: "root"
     volumes: *superset-volumes
     healthcheck:
@@ -104,12 +100,14 @@ services:
         ]
 
   superset-worker-beat:
-    image: *superset-image
+    build: .
     container_name: superset_v6_worker_beat
     command: ["/app/docker/docker-bootstrap.sh", "beat"]
     env_file: docker/.env-prod
     restart: unless-stopped
-    depends_on: *superset-depends-on
+    depends_on:
+      superset-init:
+        condition: service_completed_successfully
     user: "root"
     volumes: *superset-volumes
     healthcheck:
