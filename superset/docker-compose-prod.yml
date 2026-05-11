@@ -39,7 +39,7 @@ services:
     container_name: superset_v6_cache
     restart: unless-stopped
     volumes:
-      - superset_v4_cache:/data
+      - superset_v6_cache:/data
 
   db:
     env_file: docker/.env-prod
