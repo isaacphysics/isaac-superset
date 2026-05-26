@@ -22,7 +22,7 @@
 # unique random secure passwords and SECRET_KEY.
 #
 # For verbose logging during development:
-# - Set superset_LOG_LEVEL=debug in docker/.env-local for detailed Superset logs
+# - Set SUPERSET_LOG_LEVEL=debug in docker/.env-local for detailed Superset logs
 # -----------------------------------------------------------------------
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
