@@ -55,6 +55,11 @@ SQLALCHEMY_EXAMPLES_URI = os.getenv(
     ),
 )
 
+SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_size": 20,
+    "max_overflow": 30,
+    "pool_timeout": 60,
+}
 
 REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
